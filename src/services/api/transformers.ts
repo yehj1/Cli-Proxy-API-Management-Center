@@ -11,6 +11,7 @@ import type {
 } from '@/types';
 import type { Config } from '@/types/config';
 import { buildHeaderObject } from '@/utils/headers';
+import type { APIKeyConfig } from '@/types/config';
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -110,6 +111,34 @@ const normalizeApiKeyEntry = (entry: unknown): ApiKeyEntry | null => {
     proxyUrl: proxyUrl ? String(proxyUrl) : undefined,
     headers
   };
+};
+
+const normalizeAPIKeyConfig = (entry: unknown): APIKeyConfig | null => {
+	if (entry === undefined || entry === null) return null;
+	if (typeof entry === 'string') {
+		const trimmed = entry.trim();
+		return trimmed ? { key: trimmed } : null;
+	}
+	if (!isRecord(entry)) return null;
+
+	const key = entry?.key ?? entry?.['api-key'] ?? entry?.apiKey;
+	const trimmed = String(key || '').trim();
+	if (!trimmed) return null;
+
+	const config: APIKeyConfig = { key: trimmed };
+	const dailyLimit = entry['daily-limit'] ?? entry.dailyLimit ?? entry.limit;
+	if (dailyLimit !== undefined && dailyLimit !== null) {
+		const parsed = Number(dailyLimit);
+		if (Number.isFinite(parsed)) {
+			config.dailyLimit = parsed;
+		}
+	}
+	const expiresAt = entry['expires-at'] ?? entry.expiresAt;
+	if (expiresAt) {
+		config.expiresAt = String(expiresAt);
+	}
+
+	return config;
 };
 
 const normalizeProviderKeyConfig = (item: unknown): ProviderKeyConfig | null => {
@@ -395,7 +424,11 @@ export const normalizeConfigResponse = (raw: unknown): Config => {
   }
   const apiKeysRaw = raw['api-keys'] ?? raw.apiKeys;
   if (Array.isArray(apiKeysRaw)) {
-    config.apiKeys = apiKeysRaw.map((key) => String(key)).filter((key) => key.trim() !== '');
+    config.apiKeyConfigs = apiKeysRaw
+      .map((item) => normalizeAPIKeyConfig(item))
+      .filter(Boolean) as APIKeyConfig[];
+
+    config.apiKeys = config.apiKeyConfigs.map((c) => c.key);
   }
 
   const geminiList = raw['gemini-api-key'] ?? raw.geminiApiKey ?? raw.geminiApiKeys;

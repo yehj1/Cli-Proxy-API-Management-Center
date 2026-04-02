@@ -32,6 +32,7 @@ import type {
   PayloadFilterRule,
   PayloadParamValidationErrorCode,
   PayloadRule,
+  VisualAPIKeyConfig,
   VisualConfigFieldPath,
   VisualConfigValidationErrorCode,
   VisualConfigValidationErrors,
@@ -222,8 +223,10 @@ export function VisualConfigEditor({
     validationErrors?.['streaming.nonstreamKeepaliveInterval']
   );
 
-  const handleApiKeysTextChange = useCallback(
-    (apiKeysText: string) => onChange({ apiKeysText }),
+  const handleApiKeysChange = useCallback(
+    (apiKeys: VisualAPIKeyConfig[]) => {
+      onChange({ apiKeys });
+    },
     [onChange]
   );
   const handlePayloadDefaultRulesChange = useCallback(
@@ -747,9 +750,9 @@ export function VisualConfigEditor({
               />
               <div className={styles.subsection}>
                 <ApiKeysCardEditor
-                  value={values.apiKeysText}
+                  value={values.apiKeys}
                   disabled={disabled}
-                  onChange={handleApiKeysTextChange}
+                  onChange={handleApiKeysChange}
                 />
               </div>
             </SectionStack>

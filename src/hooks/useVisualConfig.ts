@@ -8,6 +8,7 @@ import type {
   VisualConfigValues,
   VisualConfigValidationErrors,
   PayloadParamValidationErrorCode,
+  VisualAPIKeyConfig,
 } from '@/types/visualConfig';
 import { DEFAULT_VISUAL_VALUES } from '@/types/visualConfig';
 
@@ -36,32 +37,53 @@ function extractApiKeyValue(raw: unknown): string | null {
   return null;
 }
 
-function parseApiKeysText(raw: unknown): string {
-  if (!Array.isArray(raw)) return '';
+function parseAPIKeyConfigs(raw: unknown): VisualAPIKeyConfig[] {
+  if (!Array.isArray(raw)) return [];
 
-  const keys: string[] = [];
-  for (const item of raw) {
-    const key = extractApiKeyValue(item);
-    if (key) keys.push(key);
-  }
-  return keys.join('\n');
+  return raw
+    .map((item, index) => {
+      if (typeof item === 'string') {
+        const trimmed = item.trim();
+        return trimmed
+          ? {
+              id: `apikey-${index}`,
+              key: trimmed,
+              dailyLimit: '',
+              expiresAt: '',
+            }
+          : null;
+      }
+      const record = asRecord(item);
+      if (!record) return null;
+
+      const keyVal = extractApiKeyValue(item);
+      if (!keyVal) return null;
+
+      return {
+        id: `apikey-${index}`,
+        key: keyVal,
+        dailyLimit: String(record.dailyLimit ?? record['daily-limit'] ?? ''),
+        expiresAt: String(record.expiresAt ?? record['expires-at'] ?? ''),
+      };
+    })
+    .filter(Boolean) as VisualAPIKeyConfig[];
 }
 
-function resolveApiKeysText(parsed: Record<string, unknown>): string {
+function resolveVisualAPIKeys(parsed: Record<string, unknown>): VisualAPIKeyConfig[] {
   if (Object.prototype.hasOwnProperty.call(parsed, 'api-keys')) {
-    return parseApiKeysText(parsed['api-keys']);
+    return parseAPIKeyConfigs(parsed['api-keys']);
   }
 
   const auth = asRecord(parsed.auth);
   const providers = asRecord(auth?.providers);
   const configApiKeyProvider = asRecord(providers?.['config-api-key']);
-  if (!configApiKeyProvider) return '';
+  if (!configApiKeyProvider) return [];
 
   if (Object.prototype.hasOwnProperty.call(configApiKeyProvider, 'api-key-entries')) {
-    return parseApiKeysText(configApiKeyProvider['api-key-entries']);
+    return parseAPIKeyConfigs(configApiKeyProvider['api-key-entries']);
   }
 
-  return parseApiKeysText(configApiKeyProvider['api-keys']);
+  return parseAPIKeyConfigs(configApiKeyProvider['api-keys']);
 }
 
 type YamlDocument = ReturnType<typeof parseDocument>;
@@ -493,7 +515,7 @@ export function useVisualConfig() {
             : '',
 
         authDir: typeof parsed['auth-dir'] === 'string' ? parsed['auth-dir'] : '',
-        apiKeysText: resolveApiKeysText(parsed),
+        apiKeys: resolveVisualAPIKeys(parsed),
 
         debug: Boolean(parsed.debug),
         commercialMode: Boolean(parsed['commercial-mode']),
@@ -589,10 +611,24 @@ export function useVisualConfig() {
         }
 
         setStringInDoc(doc, ['auth-dir'], values.authDir);
-        const apiKeys = values.apiKeysText
-          .split('\n')
-          .map((key) => key.trim())
-          .filter(Boolean);
+        const apiKeys = (values.apiKeys || [])
+          .filter((k: VisualAPIKeyConfig) => k.key.trim())
+          .map((k: VisualAPIKeyConfig) => {
+            const key = k.key.trim();
+            const dailyLimit = k.dailyLimit.trim();
+            const expiresAt = k.expiresAt.trim();
+
+            if (!dailyLimit && !expiresAt) return key;
+
+            const obj: Record<string, unknown> = { key };
+            if (dailyLimit) {
+              const parsed = Number(dailyLimit);
+              if (Number.isFinite(parsed)) obj['daily-limit'] = parsed;
+              else obj['daily-limit'] = dailyLimit;
+            }
+            if (expiresAt) obj['expires-at'] = expiresAt;
+            return obj;
+          });
         if (apiKeys.length > 0) {
           doc.setIn(['api-keys'], apiKeys);
         } else if (docHas(doc, ['api-keys'])) {
@@ -719,7 +755,7 @@ export function useVisualConfig() {
   );
 
   const setVisualValues = useCallback((newValues: Partial<VisualConfigValues>) => {
-    setVisualValuesState((prev) => {
+    setVisualValuesState((prev: VisualConfigValues) => {
       const next: VisualConfigValues = { ...prev, ...newValues } as VisualConfigValues;
       if (newValues.streaming) {
         next.streaming = { ...prev.streaming, ...newValues.streaming };
