@@ -62,7 +62,13 @@ function parseAPIKeyConfigs(raw: unknown): VisualAPIKeyConfig[] {
       return {
         id: `apikey-${index}`,
         key: keyVal,
-        dailyLimit: String(record.dailyLimit ?? record['daily-limit'] ?? ''),
+        dailyLimit: String(
+          record.dailyTokenLimit ??
+            record['daily-token-limit'] ??
+            record.dailyLimit ??
+            record['daily-limit'] ??
+            ''
+        ),
         expiresAt: String(record.expiresAt ?? record['expires-at'] ?? ''),
       };
     })
@@ -70,6 +76,10 @@ function parseAPIKeyConfigs(raw: unknown): VisualAPIKeyConfig[] {
 }
 
 function resolveVisualAPIKeys(parsed: Record<string, unknown>): VisualAPIKeyConfig[] {
+  if (Object.prototype.hasOwnProperty.call(parsed, 'api-key-entries')) {
+    return parseAPIKeyConfigs(parsed['api-key-entries']);
+  }
+
   if (Object.prototype.hasOwnProperty.call(parsed, 'api-keys')) {
     return parseAPIKeyConfigs(parsed['api-keys']);
   }

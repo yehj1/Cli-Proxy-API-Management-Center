@@ -38,6 +38,8 @@ export function TokenCheckPage() {
     } catch (err: any) {
       if (err.response?.status === 404) {
         setError(t('token_check.error_not_found'));
+      } else if (err.response?.status === 400) {
+        setError(t('token_check.error_required'));
       } else {
         setError(t('token_check.error_generic'));
       }
@@ -58,19 +60,42 @@ export function TokenCheckPage() {
   );
 
   const usagePercent = useMemo(() => {
-    if (!result || result.limit <= 0) return 0;
-    return Math.min(Math.round((result.used / result.limit) * 100), 100);
+    if (!result?.limitEnabled || !result.dailyTokenLimit || result.dailyTokenLimit <= 0) return 0;
+    return Math.min(
+      Math.round((result.usedTokensToday / result.dailyTokenLimit) * 100),
+      100
+    );
   }, [result]);
 
-  const isExpired = useMemo(() => {
-    if (!result?.expires_at) return false;
-    return new Date(result.expires_at).getTime() < Date.now();
-  }, [result]);
+  const isExpired = useMemo(() => result?.expired ?? false, [result]);
 
   const isQuotaExceeded = useMemo(() => {
-    if (!result || result.limit <= 0) return false;
-    return result.used >= result.limit;
+    if (!result?.limitEnabled || !result.dailyTokenLimit || result.dailyTokenLimit <= 0) return false;
+    return result.usedTokensToday >= result.dailyTokenLimit;
   }, [result]);
+
+  const formatDateTime = useCallback(
+    (value: string | null, timeZone?: string | null) => {
+      if (!value) return '-';
+      const parsed = new Date(value);
+      if (Number.isNaN(parsed.getTime())) return value;
+      try {
+        return new Intl.DateTimeFormat(language, {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+          timeZone: timeZone || 'Asia/Shanghai',
+        }).format(parsed);
+      } catch {
+        return parsed.toLocaleString(language);
+      }
+    },
+    [language]
+  );
 
   return (
     <div className={styles.container}>
@@ -132,10 +157,13 @@ export function TokenCheckPage() {
                   <div className={styles.metaLabel}>
                     <span>{t('token_check.used_tokens')}</span>
                     <span className={styles.metaValue}>
-                      {result.used.toLocaleString()} / {result.limit > 0 ? result.limit.toLocaleString() : t('token_check.unlimited')}
+                      {result.usedTokensToday.toLocaleString()} /{' '}
+                      {result.limitEnabled && result.dailyTokenLimit
+                        ? result.dailyTokenLimit.toLocaleString()
+                        : t('token_check.unlimited')}
                     </span>
                   </div>
-                  {result.limit > 0 && (
+                  {result.limitEnabled && result.dailyTokenLimit && result.dailyTokenLimit > 0 && (
                     <div className={styles.usageBar}>
                       <div 
                         className={`${styles.usageProgress} ${usagePercent > 90 ? styles.danger : usagePercent > 70 ? styles.warning : ''}`}
@@ -147,9 +175,22 @@ export function TokenCheckPage() {
 
                 <div className={styles.metaRow}>
                   <div className={styles.metaLabel}>
+                    <span>{t('token_check.remaining_tokens')}</span>
+                    <span className={styles.metaValue}>
+                      {result.limitEnabled && result.remainingTokensToday !== null
+                        ? result.remainingTokensToday.toLocaleString()
+                        : t('token_check.unlimited')}
+                    </span>
+                  </div>
+                </div>
+
+                <div className={styles.metaRow}>
+                  <div className={styles.metaLabel}>
                     <span>{t('token_check.expiration_date')}</span>
                     <span className={styles.metaValue}>
-                      {result.expires_at ? new Date(result.expires_at).toLocaleString(language) : t('token_check.never_expires')}
+                      {result.expiresAtParsed || result.expiresAt
+                        ? formatDateTime(result.expiresAtParsed ?? result.expiresAt, result.timezone)
+                        : t('token_check.never_expires')}
                     </span>
                   </div>
                 </div>
@@ -158,7 +199,7 @@ export function TokenCheckPage() {
                   <div className={styles.metaLabel}>
                     <span>{t('token_check.reset_time')}</span>
                     <span className={styles.metaValue}>
-                      {result.reset_at ? new Date(result.reset_at).toLocaleString(language) : '-'}
+                      {formatDateTime(result.nextResetAt, result.timezone)}
                     </span>
                   </div>
                 </div>
