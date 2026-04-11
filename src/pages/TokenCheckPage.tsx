@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -11,7 +10,6 @@ import styles from './TokenCheckPage.module.scss';
 
 export function TokenCheckPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { showNotification } = useNotificationStore();
   const language = useLanguageStore((state) => state.language);
 
@@ -206,11 +204,7 @@ export function TokenCheckPage() {
               </div>
             )}
 
-            <div className={styles.actions}>
-              <div className={styles.backLink} onClick={() => navigate('/login')}>
-                {t('token_check.back_to_login')}
-              </div>
-            </div>
+            <div className={styles.actions} />
           </div>
         </div>
       </div>
