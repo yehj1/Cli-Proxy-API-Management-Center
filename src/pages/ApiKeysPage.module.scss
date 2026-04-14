@@ -28,6 +28,13 @@
   margin: 8px 0 0;
 }
 
+.headerActions {
+  display: flex;
+  gap: $spacing-sm;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .buttonLabel {
   display: inline-flex;
   align-items: center;
@@ -113,6 +120,10 @@
   width: 100%;
 }
 
+.filterInputCompact {
+  width: min(360px, 100%);
+}
+
 .filterActions,
 .createActions {
   display: flex;
@@ -145,6 +156,19 @@
   color: var(--text-secondary);
 }
 
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-sm;
+  width: 100%;
+}
+
 .emptyState {
   padding: 36px 18px;
   text-align: center;
@@ -154,83 +178,62 @@
   background: color-mix(in srgb, var(--bg-secondary) 76%, transparent);
 }
 
-.list {
-  display: grid;
-  gap: $spacing-md;
-}
-
-.keyCard {
+.tableWrapper {
+  overflow-x: auto;
   border: 1px solid var(--border-color);
   border-radius: $radius-lg;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--bg-secondary) 52%, transparent), transparent 90px),
-    var(--bg-primary);
-  padding: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  background: var(--bg-primary);
 }
 
-.keyCardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: $spacing-md;
+.table {
+  width: 100%;
+  min-width: 1980px;
+  border-collapse: separate;
+  border-spacing: 0;
 
-  @include mobile {
-    flex-direction: column;
-  }
-}
-
-.keyLabel {
-  font-size: 12px;
-  color: var(--text-tertiary);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.keyValue {
-  margin-top: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-primary);
-  font-family: 'Monaco', 'Menlo', 'Consolas', 'Ubuntu Mono', monospace;
-  word-break: break-all;
-}
-
-.metaGrid {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: 0;
-
-  @include tablet {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @include mobile {
-    grid-template-columns: 1fr;
-  }
-
-  div {
-    padding: 12px 14px;
-    border-radius: $radius-md;
-    background: color-mix(in srgb, var(--bg-secondary) 76%, transparent);
-    border: 1px solid color-mix(in srgb, var(--border-color) 82%, transparent);
-  }
-
-  dt {
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 14px 16px;
+    text-align: left;
     font-size: 12px;
-    color: var(--text-tertiary);
-    margin: 0 0 6px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--bg-secondary) 92%, var(--bg-primary));
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
   }
 
-  dd {
-    margin: 0;
-    font-size: 15px;
-    font-weight: 600;
+  tbody td {
+    padding: 14px 16px;
+    font-size: 14px;
     color: var(--text-primary);
-    word-break: break-word;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 76%, transparent);
+    vertical-align: middle;
+    white-space: nowrap;
   }
+
+  tbody tr:hover {
+    background: color-mix(in srgb, var(--bg-secondary) 72%, transparent);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.keyCell {
+  min-width: 280px;
+  max-width: 420px;
+  font-family: 'Monaco', 'Menlo', 'Consolas', 'Ubuntu Mono', monospace;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actionCell {
+  width: 1%;
+  white-space: nowrap;
 }

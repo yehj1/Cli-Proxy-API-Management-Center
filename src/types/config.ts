@@ -18,9 +18,19 @@ export interface APIKeyConfig {
   dailyCreditLimit?: number;
   usedTokensToday?: number;
   remainingTokensToday?: number;
+  limitEnabled?: boolean;
+  usedCreditsToday?: number;
+  remainingCreditsToday?: number;
+  creditPerMillionTokens?: number;
+  creditUnitTokens?: number;
+  creditMode?: boolean;
   expiresAt?: string;
+  expiresAtParsed?: string;
+  expired?: boolean;
   date?: string;
   timezone?: string;
+  nextResetAt?: string;
+  secondsUntilReset?: number;
 }
 
 export interface Config {

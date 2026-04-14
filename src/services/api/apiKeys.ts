@@ -9,13 +9,24 @@ export type ApiKeyPlan = 'day' | 'week' | 'month';
 
 export interface ManagedApiKeyItem {
   apiKey: string;
+  token?: string;
   dailyTokenLimit?: number;
   dailyCreditLimit?: number;
   usedTokensToday?: number;
   remainingTokensToday?: number;
+  limitEnabled?: boolean;
+  usedCreditsToday?: number;
+  remainingCreditsToday?: number;
+  creditPerMillionTokens?: number;
+  creditUnitTokens?: number;
+  creditMode?: boolean;
   expiresAt?: string;
+  expiresAtParsed?: string;
+  expired?: boolean;
   timezone?: string;
   date?: string;
+  nextResetAt?: string;
+  secondsUntilReset?: number;
 }
 
 export interface ManagedApiKeyListResponse {
@@ -43,25 +54,58 @@ const normalizeItem = (item: unknown): ManagedApiKeyItem | null => {
 
   const toNumber = (value: unknown) =>
     typeof value === 'number' ? value : typeof value === 'string' && value.trim() ? Number(value) : undefined;
+  const toBoolean = (value: unknown) =>
+    typeof value === 'boolean'
+      ? value
+      : typeof value === 'string'
+        ? value.toLowerCase() === 'true'
+        : undefined;
+  const toString = (value: unknown) =>
+    typeof value === 'string' && value.trim() ? value : undefined;
 
   return {
     apiKey: String(apiKey),
-    dailyTokenLimit: toNumber(record['daily-token-limit'] ?? record.dailyTokenLimit),
-    dailyCreditLimit: toNumber(record['daily-credit-limit'] ?? record.dailyCreditLimit),
-    usedTokensToday: toNumber(record['used-tokens-today'] ?? record.usedTokensToday),
-    remainingTokensToday: toNumber(record['remaining-tokens-today'] ?? record.remainingTokensToday),
+    token: toString(record.token) ?? String(apiKey),
+    dailyTokenLimit: toNumber(
+      record['daily-token-limit'] ?? record.dailyTokenLimit ?? record['daily_token_limit'] ?? record.daily_limit
+    ),
+    dailyCreditLimit: toNumber(
+      record['daily-credit-limit'] ?? record.dailyCreditLimit ?? record['daily_credit_limit'] ?? record.daily_credit_limit
+    ),
+    usedTokensToday: toNumber(
+      record['used-tokens-today'] ?? record.usedTokensToday ?? record['used_tokens_today']
+    ),
+    limitEnabled: toBoolean(record['limit-enabled'] ?? record.limitEnabled ?? record['limit_enabled']),
+    remainingTokensToday: toNumber(
+      record['remaining-tokens-today'] ?? record.remainingTokensToday ?? record['remaining_tokens_today'] ?? record.remaining
+    ),
+    usedCreditsToday: toNumber(
+      record['used-credits-today'] ?? record.usedCreditsToday ?? record['used_credits_today']
+    ),
+    remainingCreditsToday: toNumber(
+      record['remaining-credits-today'] ?? record.remainingCreditsToday ?? record['remaining_credits_today']
+    ),
+    creditPerMillionTokens: toNumber(
+      record['credit-per-million-tokens'] ?? record.creditPerMillionTokens ?? record['credit_per_million_tokens']
+    ),
+    creditUnitTokens: toNumber(
+      record['credit-unit-tokens'] ?? record.creditUnitTokens ?? record['credit_unit_tokens']
+    ),
+    creditMode: toBoolean(record['credit-mode'] ?? record.creditMode ?? record['credit_mode']),
     expiresAt:
-      typeof (record['expires-at'] ?? record.expiresAt) === 'string'
-        ? String(record['expires-at'] ?? record.expiresAt)
-        : undefined,
+      toString(record['expires-at'] ?? record.expiresAt),
+    expiresAtParsed:
+      toString(record['expires-at-parsed'] ?? record.expiresAtParsed ?? record['expires_at_parsed']),
+    expired: toBoolean(record.expired),
     timezone:
-      typeof record.timezone === 'string'
-        ? record.timezone
-        : undefined,
+      toString(record.timezone ?? record['time-zone'] ?? record.time_zone),
     date:
-      typeof record.date === 'string'
-        ? record.date
-        : undefined
+      toString(record.date ?? record['current-date'] ?? record.currentDate),
+    nextResetAt:
+      toString(record['next-reset-at'] ?? record.nextResetAt ?? record['next_reset_at']),
+    secondsUntilReset: toNumber(
+      record['seconds-until-reset'] ?? record.secondsUntilReset ?? record['seconds_until_reset']
+    )
   };
 };
 
@@ -85,10 +129,20 @@ export const apiKeysApi = {
       dailyTokenLimit: item.dailyTokenLimit,
       dailyCreditLimit: item.dailyCreditLimit,
       usedTokensToday: item.usedTokensToday,
+      limitEnabled: item.limitEnabled,
       remainingTokensToday: item.remainingTokensToday,
+      usedCreditsToday: item.usedCreditsToday,
+      remainingCreditsToday: item.remainingCreditsToday,
+      creditPerMillionTokens: item.creditPerMillionTokens,
+      creditUnitTokens: item.creditUnitTokens,
+      creditMode: item.creditMode,
       expiresAt: item.expiresAt,
+      expiresAtParsed: item.expiresAtParsed,
+      expired: item.expired,
       timezone: item.timezone,
-      date: item.date
+      date: item.date,
+      nextResetAt: item.nextResetAt,
+      secondsUntilReset: item.secondsUntilReset
     }));
   },
 
