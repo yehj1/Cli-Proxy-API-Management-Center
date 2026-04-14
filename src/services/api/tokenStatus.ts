@@ -43,7 +43,7 @@ const toBoolean = (value: unknown): boolean => {
 export async function getTokenStatus(key: string, apiBase: string): Promise<TokenStatus> {
   const baseUrl = computeApiUrl(apiBase);
   const response = await axios.get<Record<string, unknown>>(
-    `${baseUrl}/v0/management/api-keys/usage`,
+    `${baseUrl}/api-keys/usage`,
     {
       params: { 'api-key': key },
       timeout: 10000

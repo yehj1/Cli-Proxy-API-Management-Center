@@ -1,0 +1,236 @@
+@use '../styles/variables' as *;
+@use '../styles/mixins' as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.pageTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.description {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 8px 0 0;
+}
+
+.buttonLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.errorBox {
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  border: 1px solid var(--danger-color);
+  background: rgba($error-color, 0.1);
+  color: var(--danger-color);
+  font-size: 14px;
+}
+
+.statsGrid {
+  display: grid;
+  gap: $spacing-md;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statCard {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--primary-color) 16%, transparent), transparent 56%),
+    var(--bg-primary);
+}
+
+.statIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--primary-color) 14%, var(--bg-secondary));
+  color: var(--primary-color);
+}
+
+.statLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+}
+
+.statValue {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.statValueSmall {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.filterForm,
+.createForm {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.filterInput {
+  width: 100%;
+}
+
+.filterActions,
+.createActions {
+  display: flex;
+  gap: $spacing-sm;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.planField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 240px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.customKeyField {
+  width: 100%;
+}
+
+.planHint,
+.planSummary {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.emptyState {
+  padding: 36px 18px;
+  text-align: center;
+  color: var(--text-secondary);
+  border: 1px dashed var(--border-color);
+  border-radius: $radius-md;
+  background: color-mix(in srgb, var(--bg-secondary) 76%, transparent);
+}
+
+.list {
+  display: grid;
+  gap: $spacing-md;
+}
+
+.keyCard {
+  border: 1px solid var(--border-color);
+  border-radius: $radius-lg;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--bg-secondary) 52%, transparent), transparent 90px),
+    var(--bg-primary);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.keyCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-md;
+
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+.keyLabel {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.keyValue {
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'Monaco', 'Menlo', 'Consolas', 'Ubuntu Mono', monospace;
+  word-break: break-all;
+}
+
+.metaGrid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+
+  @include tablet {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+
+  div {
+    padding: 12px 14px;
+    border-radius: $radius-md;
+    background: color-mix(in srgb, var(--bg-secondary) 76%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border-color) 82%, transparent);
+  }
+
+  dt {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin: 0 0 6px;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-word;
+  }
+}

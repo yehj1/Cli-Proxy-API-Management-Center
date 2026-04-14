@@ -14,7 +14,13 @@ export interface QuotaExceededConfig {
 export interface APIKeyConfig {
   key: string;
   dailyLimit?: number;
+  dailyTokenLimit?: number;
+  dailyCreditLimit?: number;
+  usedTokensToday?: number;
+  remainingTokensToday?: number;
   expiresAt?: string;
+  date?: string;
+  timezone?: string;
 }
 
 export interface Config {

@@ -207,9 +207,9 @@ export function DashboardPage() {
       label: t('dashboard.management_keys'),
       value: stats.apiKeys ?? '-',
       icon: <IconKey size={24} />,
-      path: '/config',
+      path: '/api-keys',
       loading: loading && stats.apiKeys === null,
-      sublabel: t('nav.config_management')
+      sublabel: t('nav.api_keys')
     },
     {
       label: t('nav.ai_providers'),
